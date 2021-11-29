@@ -20,13 +20,11 @@
 package PathsOfGlory;
 
 import java.awt.Component;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import VASSAL.build.module.documentation.HelpFile;
 import VASSAL.configure.IntConfigurer;
 import VASSAL.configure.VisibilityCondition;
-import VASSAL.tools.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import VASSAL.tools.SequenceEncoder;
 
 public class CounterTurnLevel extends TurnLevel {
@@ -142,17 +140,16 @@ public class CounterTurnLevel extends TurnLevel {
   protected Component getSetControl() {
 
     final IntConfigurer config = new IntConfigurer("", " "+getConfigureName()+":  ", current); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    config.addPropertyChangeListener(new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent e) {
-        current = (Integer) ((IntConfigurer) e.getSource()).getValue();
-        myValue.setPropertyValue(getValueString());
-      }});
+    config.addPropertyChangeListener(e -> {
+      current = (Integer) ((IntConfigurer) e.getSource()).getValue();
+      myValue.setPropertyValue(getValueString());
+    });
 
     return config.getControls();
   }
 
   public String[] getAttributeDescriptions() {
-    return ArrayUtils.append(
+    return ArrayUtils.addAll(
       super.getAttributeDescriptions(),
       "Start Value:  ",
       "Increment By:  ",
@@ -162,7 +159,7 @@ public class CounterTurnLevel extends TurnLevel {
   }
 
   public Class<?>[] getAttributeTypes() {
-    return ArrayUtils.append(
+    return ArrayUtils.addAll(
       super.getAttributeTypes(),
       Integer.class,
       Integer.class,
@@ -172,7 +169,7 @@ public class CounterTurnLevel extends TurnLevel {
   }
 
   public String[] getAttributeNames() {
-    return ArrayUtils.append(
+    return ArrayUtils.addAll(
       super.getAttributeNames(),
       START,
       INCR,
@@ -187,7 +184,7 @@ public class CounterTurnLevel extends TurnLevel {
       if (value instanceof String) {
         value = Integer.valueOf((String) value);
       }
-      start = ((Integer) value).intValue();
+      start = (Integer) value;
       current = start;
       myValue.setPropertyValue(getValueString());
     }
@@ -195,19 +192,19 @@ public class CounterTurnLevel extends TurnLevel {
       if (value instanceof String) {
         value = Integer.valueOf((String) value);
       }
-      incr = ((Integer) value).intValue();
+      incr = (Integer) value;
     }
     else if (LOOP.equals(key)) {
       if (value instanceof String) {
         value = Boolean.valueOf((String) value);
       }
-      loop = ((Boolean) value).booleanValue();
+      loop = (Boolean) value;
     }
     else if (LOOP_LIMIT.equals(key)) {
       if (value instanceof String) {
         value = Integer.valueOf((String) value);
       }
-      loopLimit = ((Integer) value).intValue();
+      loopLimit = (Integer) value;
     }
     else {
       super.setAttribute(key, value);
@@ -249,9 +246,5 @@ public class CounterTurnLevel extends TurnLevel {
     }
   }
 
-  private VisibilityCondition loopCond = new VisibilityCondition() {
-    public boolean shouldBeVisible() {
-      return loop;
-    }
-  };
+  final private VisibilityCondition loopCond = () -> loop;
  }

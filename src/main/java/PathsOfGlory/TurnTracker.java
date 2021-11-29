@@ -31,8 +31,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +49,6 @@ import javax.swing.SwingConstants;
 
 import VASSAL.build.AutoConfigurable;
 import VASSAL.build.Buildable;
-import VASSAL.build.Configurable;
 import VASSAL.build.GameModule;
 import VASSAL.build.module.Chatter;
 import VASSAL.build.module.GameComponent;
@@ -160,13 +157,11 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
 
   public TurnTracker() {
 
-    ActionListener al = new ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent e) {
-        if (!isDocked()) {
-          turnWindow.setControls();
-          turnWindow.setVisible(!turnWindow.isShowing());
-          turnWindow.setFocusable(true);
-        }
+    ActionListener al = e -> {
+      if (!isDocked()) {
+        turnWindow.setControls();
+        turnWindow.setVisible(!turnWindow.isShowing());
+        turnWindow.setFocusable(true);
       }
     };
     setConfigureName(Resources.getString("TurnTracker.turn")); //$NON-NLS-1$
@@ -189,41 +184,23 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
     GameModule.getGameModule().getPrefs().addOption(prefTab, docked);
     GameModule.getGameModule().getPrefs().addOption(prefTab, padding);
 
-    size.addPropertyChangeListener(new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent e) {
-        setDisplayFont();
-      }});    
+    size.addPropertyChangeListener(e -> setDisplayFont());
 
-    bold.addPropertyChangeListener(new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent e) {
-        setDisplayFont();
-      }});
+    bold.addPropertyChangeListener(e -> setDisplayFont());
 
-    docked.addPropertyChangeListener(new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent e) {
-        setDocked(isDocked());
-      }});
+    docked.addPropertyChangeListener(e -> setDocked(isDocked()));
     
-    padding.addPropertyChangeListener(new PropertyChangeListener() {
-	    public void propertyChange(PropertyChangeEvent e) {
-	      turnWidget.setControls();
-	      turnWidget.repaint();
-	    }});    
+    padding.addPropertyChangeListener(e -> {
+      turnWidget.setControls();
+      turnWidget.repaint();
+    });
 
 
     // Set up listeners for prev/next hotkeys
-    nextListener = new NamedKeyStrokeListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        turnWidget.doNext();
-      }
-    });
+    nextListener = new NamedKeyStrokeListener(e -> turnWidget.doNext());
     GameModule.getGameModule().addKeyStrokeListener(nextListener);
 
-    prevListener = new NamedKeyStrokeListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        turnWidget.doPrev();
-      }
-    });
+    prevListener = new NamedKeyStrokeListener(e -> turnWidget.doPrev());
     GameModule.getGameModule().addKeyStrokeListener(prevListener);
 
     // Create the displayable widget
@@ -287,7 +264,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
       if (value instanceof String) {
         value = Integer.valueOf((String) value);
       }
-      width = ((Integer) value).intValue();
+      width = (Integer) value;
     }
     else if (LENGTH_STYLE.equals(key)) {
       lengthStyle = (String) value;
@@ -362,24 +339,24 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
   }
 
   protected int getFontSize() {
-    return ((Integer) GameModule.getGameModule().getPrefs().getValue(FONT_SIZE)).intValue();
+    return (Integer) GameModule.getGameModule().getPrefs().getValue(FONT_SIZE);
   }
   
   protected int getPadding() {
-	return ((Integer) GameModule.getGameModule().getPrefs().getValue(PADDING)).intValue();
+	return (Integer) GameModule.getGameModule().getPrefs().getValue(PADDING);
   }
 
   protected int getFontStyle() {
-    return ((Boolean) GameModule.getGameModule().getPrefs().getValue(FONT_BOLD)).booleanValue() ? 1 : 0;
+    return (Boolean) GameModule.getGameModule().getPrefs().getValue(FONT_BOLD) ? 1 : 0;
   }
 
   protected boolean isDocked() {
-    return ((Boolean) GameModule.getGameModule().getPrefs().getValue(DOCKED)).booleanValue();
+    return (Boolean) GameModule.getGameModule().getPrefs().getValue(DOCKED);
   }
 
   protected void setDocked(boolean dock) {
     final GameModule g = GameModule.getGameModule();
-    g.getPrefs().setValue(DOCKED, Boolean.valueOf(dock));
+    g.getPrefs().setValue(DOCKED, dock);
     launch.setVisible(
       !dock && (
         getAttributeValueString(BUTTON_TEXT).length() > 0 ||
@@ -474,7 +451,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
   public static class TurnFormatConfig implements TranslatableConfigurerFactory {
     public Configurer getConfigurer(AutoConfigurable c, String key, String name) {
       TurnTracker t = (TurnTracker) c;
-      String s[] = new String[t.getLevelCount()];
+      String[] s = new String[t.getLevelCount()];
       for (int i = 0; i < s.length; i++) {
         s[i] = LEVEL+(i+1);
       }
@@ -496,11 +473,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
 
   public VisibilityCondition getAttributeVisibility(String name) {
     if (LENGTH.equals(name)) {
-      return new VisibilityCondition() {
-        public boolean shouldBeVisible() {
-          return LENGTH_FIXED.equals(lengthStyle);
-        }
-      };
+      return () -> LENGTH_FIXED.equals(lengthStyle);
     }
     else {
       return null;
@@ -608,7 +581,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
    * @return maximum turn string
    */
   protected String getMaximumTurnString() {
-    List<String> levels = new ArrayList<String>();
+    List<String> levels = new ArrayList<>();
     for (Buildable b : getBuildables()) {
       if (b instanceof TurnLevel) {
         ((TurnLevel) b).findMaximumStrings(levels, 0);
@@ -640,7 +613,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
    * @return
    */
   protected List<TurnLevel> getActiveChildLevels() {
-    ArrayList<TurnLevel> levels = new ArrayList<TurnLevel>();
+    ArrayList<TurnLevel> levels = new ArrayList<>();
     TurnLevel level = getTurnLevel(currentLevel);
     if (level != null) {
       levels.add(level);
@@ -914,18 +887,12 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
       nextButton = new IconButton(IconButton.PLUS_ICON, BUTTON_SIZE);
       setNextStroke(nextListener.getNamedKeyStroke());
       nextButton.setAlignmentY(Component.TOP_ALIGNMENT);
-      nextButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          doNext();
-        }});
+      nextButton.addActionListener(e -> doNext());
 
       prevButton = new IconButton(IconButton.MINUS_ICON, BUTTON_SIZE);
       setPrevStroke(prevListener.getNamedKeyStroke());
       prevButton.setAlignmentY(Component.TOP_ALIGNMENT);
-      prevButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          doPrev();
-        }});
+      prevButton.addActionListener(e -> doPrev());
 
       // Next, the Label containing the Turn Text
       turnLabel.setFont(getDisplayFont());
@@ -943,12 +910,10 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
       //BR// watch when our Turn Name string changes and repaint
       MutableProperty.Impl turnProp = (MutableProperty.Impl) GameModule.getGameModule().getMutableProperty("Turn Name");
 	  if (turnProp != null) {
-		  turnProp.addMutablePropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				setControls();
-				repaint();
-			}			  
-		  });
+		  turnProp.addMutablePropertyChangeListener(evt -> {
+        setControls();
+        repaint();
+      });
 	  }
 
       addMouseListener(this);
@@ -1080,7 +1045,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
     protected JDialog me;
 
     protected SetDialog() {
-      super(GameModule.getGameModule().getFrame());
+      super(GameModule.getGameModule().getPlayerWindow());
       initComponents();
       setLocation(100, 100);
       me = this;
@@ -1105,20 +1070,16 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
       JButton saveButton = new JButton(Resources.getString(Resources.SAVE));
       saveButton.setToolTipText(Resources.getString("TurnTracker.save_changes")); //$NON-NLS-1$
       p.add(saveButton);
-      saveButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          saveSet();
-          setVisible(false);
-        }
+      saveButton.addActionListener(e -> {
+        saveSet();
+        setVisible(false);
       });
 
       JButton cancelButton = new JButton(Resources.getString(Resources.CANCEL));
       cancelButton.setToolTipText(Resources.getString("TurnTracker.discard_changes")); //$NON-NLS-1$
-      cancelButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          cancelSet();
-          setVisible(false);
-        }
+      cancelButton.addActionListener(e -> {
+        cancelSet();
+        setVisible(false);
       });
       p.add(cancelButton);
 
@@ -1144,23 +1105,22 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(BorderFactory.createLineBorder(Color.black));
 
-        String s[] = new String[getTurnLevelCount()];
+        String[] s = new String[getTurnLevelCount()];
         for (int i = 0; i < s.length; i++) {
           s[i] = getTurnLevel(i).getConfigureName();
         }
         StringEnumConfigurer e = new StringEnumConfigurer(null, Resources.getString("TurnTracker.select"), s); //$NON-NLS-1$
         e.setValue(getTurnLevel(currentLevel).getConfigureName());
-        e.addPropertyChangeListener(new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent e) {
-            String option = ((StringEnumConfigurer) e.getSource()).getValueString();
-            for (int i = 0; i < getTurnLevelCount(); i++) {
-              if (option.equals(getTurnLevel(i).getConfigureName())) {
-                  currentLevel = i;
-                  updateTurnDisplay(SET);
-                  addChildControls();
-              }
+        e.addPropertyChangeListener(e1 -> {
+          String option = ((StringEnumConfigurer) e1.getSource()).getValueString();
+          for (int i = 0; i < getTurnLevelCount(); i++) {
+            if (option.equals(getTurnLevel(i).getConfigureName())) {
+                currentLevel = i;
+                updateTurnDisplay(SET);
+                addChildControls();
             }
-          }});
+          }
+        });
 
         p.add(Box.createRigidArea(FILLER));
         p.add(e.getControls());
@@ -1202,9 +1162,9 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
   }
 
   public static class SetTurn extends Command {
-    private String oldState;
-    private String newState;
-    private TurnTracker turn;
+    private final String oldState;
+    private final String newState;
+    private final TurnTracker turn;
 
     public SetTurn(String newState, TurnTracker t) {
       this.newState = newState;

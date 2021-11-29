@@ -41,7 +41,7 @@ import VASSAL.configure.StringEnumConfigurer;
 import VASSAL.configure.VisibilityCondition;
 import VASSAL.i18n.ComponentI18nData;
 import VASSAL.i18n.Resources;
-import VASSAL.tools.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import VASSAL.tools.FormattedString;
 import VASSAL.tools.SequenceEncoder;
 
@@ -259,7 +259,7 @@ public class ListTurnLevel extends TurnLevel implements ActionListener {
   }
 
   public String[] getAttributeDescriptions() {
-    return ArrayUtils.append(
+    return ArrayUtils.addAll(
       super.getAttributeDescriptions(),
       "List of Items",
       "Allow players to hide items in this list?",
@@ -269,7 +269,7 @@ public class ListTurnLevel extends TurnLevel implements ActionListener {
   }
 
   public Class<?>[] getAttributeTypes() {
-    return ArrayUtils.append(
+    return ArrayUtils.addAll(
       super.getAttributeTypes(),
       String[].class,
       Boolean.class,
@@ -279,7 +279,7 @@ public class ListTurnLevel extends TurnLevel implements ActionListener {
   }
 
   public String[] getAttributeNames() {
-    return ArrayUtils.append(
+    return ArrayUtils.addAll(
       super.getAttributeNames(),
       LIST,
       CONFIG_LIST,

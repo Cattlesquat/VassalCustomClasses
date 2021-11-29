@@ -54,11 +54,12 @@ public class POGChatter extends VASSAL.build.module.Chatter implements CommandEn
         style = "apchat";
       }
 
-      if (s.contains("@cp")) {  //BR// A way to have explicit color chat messages in narrated playbacks.
+      final String ss = s.toLowerCase();
+      if (ss.contains("@cp")) {  //BR// A way to have explicit color chat messages in narrated playbacks.
         style = "cpchat";
-      } else if (s.contains("@ap")) {
+      } else if (ss.contains("@ap")) {
         style = "apchat";
-      } else if (s.contains("@ref")) {
+      } else if (ss.contains("@ref")) {
         style = "ref";
       }
     } else {
