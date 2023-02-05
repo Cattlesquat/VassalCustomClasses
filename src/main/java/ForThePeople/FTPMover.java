@@ -191,10 +191,10 @@ public class FTPMover extends VASSAL.build.module.map.PieceMover {
       comm = comm.append(report);
     }
 
-    // BR// Clears a global property flag once per stack move (to avoid duplication
-    // of certain global key commands)
-    // BR// A trigger processing this can then use this information to make sure a
-    // particular trigger sequence is processed exactly once for the stack.
+    //BR// Clears a global property flag once per stack move (to avoid duplication
+    //of certain global key commands)
+    //BR// A trigger processing this can then use this information to make sure a
+    //particular trigger sequence is processed exactly once for the stack.
     MutableProperty.Impl existingValue = (MutableProperty.Impl) GameModule.getGameModule().getMutableProperty("ClearedOncePerStackMove");
     if (existingValue != null) {
       comm = comm.append(existingValue.setPropertyValue("0"));

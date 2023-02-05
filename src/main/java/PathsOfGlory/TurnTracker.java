@@ -932,7 +932,7 @@ public class TurnTracker extends TurnComponent implements CommandEncoder, GameCo
     }
 
 
-
+    //BR// Main special turn button
     public void setControls() {
       String s = updateString(getTurnString(), new String[] { "\\n", "\\t" }, new String[] { "\n", "    " }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       
