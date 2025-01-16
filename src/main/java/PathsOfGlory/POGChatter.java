@@ -44,6 +44,10 @@ public class POGChatter extends VASSAL.build.module.Chatter implements CommandEn
   protected static final String CP_CHAT_COLOR = "PoGCPChatColor";
   Color apChat, cpChat;
 
+  private String CP_NAME = "CP Player";
+  private String AP_NAME = "AP Player";
+  private String REF_NAME = "Moderator";
+
   /**
    * Styles a chat message based on the player who sent it.
    * Overrides VASSAL's standard "my machine" / "other machine" logic with a way to assign the CP "grey" color to whoever
@@ -126,7 +130,7 @@ public class POGChatter extends VASSAL.build.module.Chatter implements CommandEn
    * @param s chat string from command
    */
   public void myDoShow(String s) {
-    final String style;
+    String style;
     final boolean html_allowed;
 
     // Choose an appropriate style to display this message in
@@ -151,7 +155,7 @@ public class POGChatter extends VASSAL.build.module.Chatter implements CommandEn
             s = s.substring(2);
           }
           else {
-            s = "CP Player: " + s;
+            s = CP_NAME + ": " + s;
           }
         }
         else if (s.contains("@ap")) {
@@ -160,7 +164,7 @@ public class POGChatter extends VASSAL.build.module.Chatter implements CommandEn
             s = s.substring(2);
           }
           else {
-            s = "AP Player: " + s;
+            s = AP_NAME + ": " + s;
           }
         }
         else if (s.contains("@ref")) {
@@ -169,11 +173,29 @@ public class POGChatter extends VASSAL.build.module.Chatter implements CommandEn
             s = s.substring(2);
           }
           else {
-            s = "Moderator: " + s;
+            s = REF_NAME + ": " + s;
           }
         }
         else if (s.contains("@@")) {
           s = removeHeader(s).replace("@@", "");
+        }
+        else if (s.contains("@set cp")) {
+          s = removeHeader(s).replace("@set cp ", "");
+          CP_NAME = s;
+          style = "cpchat";
+          s = "CP Player Name set to: " + s;
+        }
+        else if (s.contains("@set ap")) {
+          s = removeHeader(s).replace("@set ap ", "");
+          AP_NAME = s;
+          style = "apchat";
+          s = "AP Player Name set to: " + s;
+        }
+        else if (s.contains("@set ref")) {
+          s = removeHeader(s).replace("@set ref ", "");
+          REF_NAME = s;
+          style = "ref";
+          s = "Moderator Name set to: " + s;
         }
 
         boolean html = false;
